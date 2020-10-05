@@ -1,6 +1,7 @@
 # racecar_nano_v2
 
 This is a 1/10 RC autonomous car project. For project's progress and description, check out the posts in [my linkedin](https://www.linkedin.com/in/oscarkfpang/)
+![Image of Racecar_Nano_V2](racecar_nano_v2.png)
 
 # Components
 + Chassis:  Tamiya DB-02 Leonis with hop-up options
@@ -10,6 +11,7 @@ This is a 1/10 RC autonomous car project. For project's progress and description
 + System:   Jetson Nano
 + Optional: Intel Realsense D435+T265
 + OS:       Ubuntu 18 + ROS Melodic
++ ![Image of Chessis](chassis.jpeg)
 
 # Installation
 1. Initialize ROS catkin workspace (built and run on ROS Melodic)
@@ -18,6 +20,7 @@ This is a 1/10 RC autonomous car project. For project's progress and description
 3. Run catkin_make to compile the folder
 4. Source the workspace devel/setup.bash in the terminal
 5. In the same terminal, run *roslaunch mushr_base teleop_test2.launch
+![Racecar_Nano_V2 in operation](operation.png)
 
 # Source of Reference
 This project and its codes are inspired and adopted from various sources, with some modifications.
