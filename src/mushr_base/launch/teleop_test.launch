@@ -1,0 +1,37 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <!-- Change car name to match the name of the car, e.g. car1 -->
+  <arg name="car_name" default="car" />
+
+  <!-- Could be racecar-mit, racecar-uw-tx2, or racecar-uw-nano -->
+  <arg name="racecar_version" default="racecar-uw-nano" />
+
+
+  <group ns="$(arg car_name)">
+
+    <param name="robot_description"
+           textfile="$(find mushr_description)/robots/racecar-nano.urdf"/>
+
+    <group ns="teleop">
+        <include file="$(find mushr_base)/launch/includes/joy_teleop.launch">
+            <arg name="car_name" value="/$(arg car_name)" />
+        </include>
+    </group>
+
+    <!-- no mux here -->
+
+    <include file="$(find mushr_base)/launch/includes/racecar_state.launch">
+        <arg name="tf_prefix" value="$(arg car_name)" />
+    </include>
+
+    <node pkg="robot_state_publisher" type="robot_state_publisher" name="state_publisher">
+      <param name="tf_prefix" value="$(arg car_name)"/>
+      <param name="robot_description" value="/$(arg car_name)/robot_description"/>
+    </node>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+        <param name="use gui" value="TRUE"/>
+    </node>
+
+  </group>
+</launch>

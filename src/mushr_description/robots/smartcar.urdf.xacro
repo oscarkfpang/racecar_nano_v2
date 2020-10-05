@@ -1,0 +1,200 @@
+<?xml version="1.0"?> 
+<robot  xmlns:xacro="http://ros.org/wiki/xacro" name="smartcar">
+
+  <!-- Length between front and real wheel axel -->
+  <xacro:property name="wheelbase" value="0.28" />    
+
+  <!-- Distance between the end of the rear axle-->
+  <xacro:property name="base_width_rear" value="0.234" />    
+  <!-- Distance between the end of the front axle -->
+  <xacro:property name="base_width_front" value="0.222" />    
+
+  <xacro:property name="ground_clearance" value="0.023" />
+  <xacro:property name="wheel_radius" value="0.04425" />
+  <xacro:property name="wheel_length_front" value="0.032" />
+  <xacro:property name="wheel_length_rear" value="0.043" />
+  <xacro:property name="laser_distance_from_base_link" value="0.05" />
+  <xacro:property name="laser_height" value="0.04" />
+  <xacro:property name="laser_radius" value="0.035" />
+  <xacro:property name="wheel_axle_length" value="0.035" />
+  <xacro:property name="wheel_axle_radius" value="0.005" />
+
+  <!-- Width of the car chassis, excluding wheel width in each side -->
+  <xacro:property name="chassis_width" value="0.234" /> 
+  <!-- Height of the car chassis -->
+  <xacro:property name="chassis_height" value="${(wheel_radius - ground_clearance)*2}" /> 
+
+  <!-- Length of the car chassis / -->
+  <xacro:property name="chessis_length" value="0.34" /> 
+
+  <xacro:include filename="$(find mushr_description)/robots/smartcar_marcos.xacro" />
+
+  <xacro:include filename="$(find mushr_description)/robots/smartcar.gazebo" />
+
+  <link name="base_footprint">
+			<inertial>
+				<origin
+					xyz="0 0 0"
+					rpy="0 0 0" />
+				<mass
+					value="0.1" />
+				<inertia
+					ixx="1"
+					ixy="0"
+					ixz="0"
+					iyy="1"
+					iyz="0"
+					izz="1" />
+			</inertial>
+  </link>
+
+  <link name="base_link">
+    <visual>
+            <geometry>
+                <box size="${chessis_length} ${chassis_width - wheel_axle_length * 2} ${chassis_height}"/>
+            </geometry>
+
+            <origin rpy="0 0 ${pi/2}" xyz="0 0 0"/>
+
+            <material name="blue">
+                <color rgba="0 .5 .8 1"/>
+            </material>
+        </visual>
+  </link>
+
+  <joint name="base_footprint_to_base_link" type="fixed">
+    <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0" />
+    <parent link="base_footprint" />
+    <child link="base_link" />
+  </joint>
+
+  <link name="chassis_inertia">
+    	<inertial>
+	  <mass value="3.0" />
+	  <inertia ixx="0.010609" ixy="0"          ixz="0"
+		                  iyy="0.050409"   iyz="0"
+		                                   izz="0.05865" />
+    	</inertial>
+  </link>
+
+  <joint name="chassis_inertia_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="chassis_inertia" />
+  </joint>
+
+	<xacro:four_wheel_axles/>
+	<xacro:smartcar_wheel prefix="rear_right" front="false"/>
+	<xacro:smartcar_wheel prefix="rear_left" front="false"/>
+	<xacro:smartcar_wheel prefix="front_left" front="true"/>
+	<xacro:smartcar_wheel prefix="front_right" front="true"/>
+
+    <joint name="rear_right_wheel_throttle" type="continuous">  
+        <axis xyz="0 0 -1"/>  
+        <parent link="base_link"/>  
+        <child link="rear_right_wheel"/>  
+        <origin rpy="0 ${pi/2} 0" xyz=" ${chassis_width / 2 + wheel_length_rear / 2} ${-wheelbase / 2} 0"/>  
+        <limit effort="10" velocity="1000"/>  
+        <joint_properties damping="0.0" friction="0.0"/>  
+    </joint>
+  <xacro:wheel_transmission name="rear_right_wheel"/>
+    
+    <joint name="rear_left_wheel_throttle" type="continuous">  
+        <axis xyz="0 0 -1"/>  
+        <parent link="base_link"/>  
+        <child link="rear_left_wheel"/>  
+        <origin rpy="0 ${pi/2} 0" xyz=" ${-chassis_width / 2 - wheel_length_rear / 2} ${-wheelbase / 2} 0"/>  
+        <limit effort="10" velocity="1000"/> 
+        <joint_properties damping="0.0" friction="0.0"/>  
+    </joint>
+  <xacro:wheel_transmission name="rear_left_wheel"/>
+
+  <link name="right_steering_hinge">
+    <inertial>
+      <xacro:steering_hinge_inertial_params />
+    </inertial>
+    <visual>
+      <xacro:right_steering_hinge_geometry />
+      <material name="grey" />
+    </visual>
+  </link>
+
+  <joint name="right_steering_hinge_joint" type="revolute">
+    <origin rpy="0 ${pi/2} 0" xyz=" ${chassis_width / 2} ${wheelbase / 2} 0"/>  
+    <parent link="base_link" />
+    <child link="right_steering_hinge" />
+    <axis xyz="-1 0 0" />
+    <limit lower="-1.0" upper="1.0" effort="10" velocity="1000" />
+  </joint>
+   <xacro:steering_hinge_transmission name="right_steering"/>
+
+  <joint name="front_right_wheel_throttle" type="continuous">
+    <origin xyz="0 0 ${wheel_length_front / 2}" rpy="0 0 0" />
+    <parent link="right_steering_hinge" />
+    <child link="front_right_wheel" />
+    <axis xyz="0 0 -1" />
+    <limit effort="10" velocity="1000"/>
+  </joint>
+  <xacro:wheel_transmission name="front_right_wheel"/>
+  
+  <link name="left_steering_hinge">
+    <inertial>
+      <xacro:steering_hinge_inertial_params />
+    </inertial>
+    <visual>
+      <xacro:left_steering_hinge_geometry />
+      <material name="grey" />
+    </visual>
+  </link>
+
+  <joint name="left_steering_hinge_joint" type="revolute">
+    <origin rpy="0 ${pi/2} 0" xyz=" ${-chassis_width / 2} ${wheelbase / 2} 0"/>
+    <parent link="base_link" />
+    <child link="left_steering_hinge" />
+    <axis xyz="-1 0 0" />
+    <limit lower="-1.0" upper="1.0" effort="10" velocity="1000" />
+  </joint>
+  <xacro:steering_hinge_transmission name="left_steering"/>
+
+  <joint name="front_left_wheel_throttle" type="continuous">
+    <origin xyz="0 0 ${-wheel_length_front / 2}" rpy="0 0 0" />
+    <parent link="left_steering_hinge" />
+    <child link="front_left_wheel" />
+    <axis xyz="0 0 -1" />
+    <limit effort="10" velocity="1000" />
+  </joint>
+  <xacro:wheel_transmission name="front_left_wheel"/> 
+
+    
+    <link name="camera_link">  
+        <visual>  
+            <geometry>  
+                <box size=".02 .03 .03"/>  
+            </geometry>  
+            <material name="white">
+                <color rgba="1 1 1 1"/>  
+            </material>  
+        </visual>
+    	<collision>
+      	  <geometry>
+        	<box size="0.02 .03 .03"/>
+     	  </geometry>
+    	</collision>
+    	<inertial>
+      	  <mass value="0.1"/>
+      	  <inertia ixx="0.000010833" iyy="0.000010833" izz="0.000015" ixy="0" ixz="0" iyz="0"/>
+    	</inertial>
+    </link>  
+    
+    <joint name="tobox" type="fixed">  
+        <parent link="base_link"/>  
+        <child link="camera_link"/>  
+        <origin xyz="0 0.08 0.025" rpy="0 0 1.57"/>  
+    </joint>
+    <gazebo reference="camera">
+        <material>Gazebo/Blue</material>
+    </gazebo> 
+
+
+</robot>
+

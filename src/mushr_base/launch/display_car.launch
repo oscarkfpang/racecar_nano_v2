@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+<arg name="gui" default="false" />
+<arg name="model_path" default="smartcar.urdf.xacro" />
+<param name="robot_description" command="$(find xacro)/xacro --inorder '$(find mushr_description)/robots/$(arg model_path)'" />
+<param name="use_gui" value="$(arg gui)"/>
+<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="TRUE"/>
+</node>
+<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+<node name="rviz" pkg="rviz" type="rviz" args="" />
+
+<!-- node name="rviz" pkg="rviz" type="rviz" args="$(find racecar_description)/my_robot/config.rviz" required="true" / -->
+</launch>
